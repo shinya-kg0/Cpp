@@ -153,3 +153,173 @@ public内に関数名のようにクラス名を記述すれば良い
 
 
 
+# プリプロセッサ
+
+中心的な処理（main関数など）の前処理を行う部分
+
+例）`#include`, `using namespace`, `#define`など
+
+- コンパイル時に実行される
+  - 実行時の処理に含まれない
+  - 入力ファイルで処理を変えられない
+
+- Cでよく使われる
+  - C++は`const int xxx`の方が推奨される
+
+- マクロ定義では関数も使用可能！
+  - 三項演算子と組み合わせることも多い
+  - `三項演算子：(条件) ? (true処理) : (false処理)`
+
+## ifdef/ifndef
+
+プリプロセッサでif文が使える！
+
+→ PC内の設定に応じて処理を変えることができる！（PCによってメモリが違うなど、、、）
+
+```c++
+#if 条件
+  処理
+#else
+  処理
+#endif
+```
+
+- `ifdef`：もし定義されていたら処理を行う
+  - メリットとしては、設定し忘れた変数を補完できる。
+
+```c++
+#ifdef 定数名
+  処理
+#else
+  処理
+#endif
+
+#ifdef MAX
+#else
+  #define MAX 128
+#endif
+```
+
+- `ifndef`：もし定義されていなかったら、処理を行う
+
+```c++
+#ifndef 定数名
+  処理
+#else
+  処理
+#endif
+
+#ifdef MAX
+  #define MAX 128
+#endif
+```
+
+## include
+
+他のファイルを読み込む
+
+1. `#include <xxx.h>`
+   1. パスが通っているところから`xxx.h`を探してくれる→ ライブラリで使う
+2. `#include "xxx.h"`
+   1. 同じディレクトリを探した後に、パスが通っているところを探す→ 自作ヘッダ利用時に使用
+
+
+# Eigen
+
+サードパーティ製なので、ライブラリの配置をする必要がある。
+
+公式ページからzipファイルをとってきて、所定の位置に配置。  
+makefileなどに設定する。
+
+ライブラリが多くなってくるとMakefileを使った方がよい。
+
+簡易版としてhomebrewを使う。
+
+## 環境構築
+
+```bash
+$brew install eigen
+
+$brew list eigen
+
+/opt/homebrew/Cellar/eigen/3.4.1/include/eigen3/ (530 files)
+/opt/homebrew/Cellar/eigen/3.4.1/sbom.spdx.json
+/opt/homebrew/Cellar/eigen/3.4.1/share/eigen3/ (4 files)
+/opt/homebrew/Cellar/eigen/3.4.1/share/pkgconfig/eigen3.pc
+```
+
+配置されたパスをコンパイル時に渡すことで利用可能
+
+```bash
+clang++ -std=c++17 eigen.cpp -o eigen -I /opt/homebrew/Cellar/eigen/3.4.1/include/eigen3
+```
+
+## 型の種類
+
+### ベクトル
+
+`Vector<次元><型> 変数名;`
+
+- Vector3i: 3次元のベクトル（int）
+- Vector3f: float
+- Vector3d: double（よく使う）
+
+- Vector2d: 2要素
+- Vector3d: 3要素
+- Vector4d: 4要素
+
+### 行列
+
+`Metrix<次元><型> 変数名;`
+
+- Matrix2d m2: 2x2行列
+- Matrix3d m3: 3x3
+- Matrix4d m4: 4x4
+
+### 無次元行列
+
+宣言時の要素数で行列サイズを決定する  
+可読性を考えると上の書き方の方がいい時もある
+
+- VectorXd v(5): 5要素
+- MetrixXd m(10,10); 10x10行列
+
+
+## サイズを見たい時
+
+- 行数：`変数.rows()`
+- 列数：`変数.cols()`
+- 要素数：`変数.size()`
+- リサイズしたい：`変数.resize(要素数)`
+
+## 便利機能
+
+- ランダムな値で初期化：`Matrix::Random(サイズ)`
+- 転置行列：`変数.transpose()`
+- 最大値：`.maxCoeff()`
+- 最小値：`.minCoeff()`
+- 合計：`.sum()`
+- 平均値：`.mean()`
+
+## 行列計算
+
+逆行列などは大変→ Eigenを活用（高速化や並列処理で活躍！）
+
+- 行列計算には2つある
+  - 直接法  
+    - 直接、逆行列を求めにいく。
+    - さまざまなメソッドが存在するので場合によって使い分ける。
+  - 反復法
+    - 疎行列に適している
+
+- Matrixは行列同士の演算は内積的に計算をする
+- Arrayを使うことで、行列同士の計算を要素同士で行える。
+
+```c++
+// ベクトル
+ArrayXd a(3);
+// 行列
+ArrayXXd b(2,2);
+```
+
+
