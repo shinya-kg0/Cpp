@@ -2,3 +2,5 @@
 build
 src/practice/*
 !src/practice/*.cpp
+src/c++_picture_book/*
+!src/c++_picture_book/*.cpp
